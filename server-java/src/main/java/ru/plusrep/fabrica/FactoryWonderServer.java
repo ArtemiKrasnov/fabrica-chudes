@@ -5,9 +5,11 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -243,11 +245,30 @@ public final class FactoryWonderServer {
 
         private synchronized void add(Map<String, Object> star) throws IOException {
             stars.add(star);
+            Path temporaryFile = null;
             try {
-                Files.writeString(file, Json.stringify(stars) + System.lineSeparator(), StandardCharsets.UTF_8);
+                temporaryFile = Files.createTempFile(file.getParent(), "stars-", ".tmp");
+                Files.writeString(
+                    temporaryFile,
+                    Json.stringify(stars) + System.lineSeparator(),
+                    StandardCharsets.UTF_8
+                );
+                try {
+                    Files.move(
+                        temporaryFile,
+                        file,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING
+                    );
+                } catch (AtomicMoveNotSupportedException exception) {
+                    Files.move(temporaryFile, file, StandardCopyOption.REPLACE_EXISTING);
+                }
             } catch (IOException exception) {
                 stars.remove(stars.size() - 1);
+                System.err.println("Не удалось сохранить звезду в " + file + ": " + exception.getMessage());
                 throw exception;
+            } finally {
+                if (temporaryFile != null) Files.deleteIfExists(temporaryFile);
             }
         }
     }
