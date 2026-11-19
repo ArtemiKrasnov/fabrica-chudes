@@ -242,23 +242,28 @@ function DonorStars({ stars }) {
   return (
     <div className="star-field" aria-label="Звёзды донатеров">
       {stars.map((star) => (
-        <button
+        <div
           className={`donor-star${openStarId === star.id ? " is-open" : ""}`}
           key={star.id}
-          type="button"
           style={{ left: `${star.x}%`, top: `${star.y}%` }}
-          aria-label={`Звезда донатера ${star.name}`}
-          aria-expanded={openStarId === star.id}
-          onClick={(event) => {
-            event.stopPropagation();
-            setOpenStarId((current) => current === star.id ? null : star.id);
-          }}
+          data-side={star.x < 50 ? "left" : "right"}
         >
-          <span>
+          <button
+            className="donor-star-button"
+            type="button"
+            aria-label={`Звезда донатера ${star.name}, ${star.amount.toLocaleString("ru-RU")} рублей`}
+            aria-expanded={openStarId === star.id}
+            aria-controls={`donor-star-popup-${star.id}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              setOpenStarId((current) => current === star.id ? null : star.id);
+            }}
+          />
+          <span className="donor-star-popup" id={`donor-star-popup-${star.id}`} role="tooltip">
             <strong>{star.name}</strong>
-            <small>{star.amount.toLocaleString("ru-RU")} ₽ · {star.project}</small>
+            <small>{star.amount.toLocaleString("ru-RU")} ₽</small>
           </span>
-        </button>
+        </div>
       ))}
     </div>
   );

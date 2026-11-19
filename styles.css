@@ -39,13 +39,15 @@ h1, h2 { font-family: "Comic Sans MS", "Trebuchet MS", "Segoe UI", cursive; }
 .snow i:nth-child(4n) { animation-delay: -7s; }
 @keyframes snowfall { to { transform: translate(40px, 580px) rotate(180deg); } }
 .fund-logo, .fund-name, .tagline { position: relative; z-index: 3; }
-.star-field { position: absolute; z-index: 2; top: 0; left: 0; width: 100%; height: 65%; pointer-events: none; }
-.donor-star { position: absolute; width: 22px; height: 22px; padding: 0; border: 0; background: #ffe487; clip-path: polygon(50% 0, 61% 36%, 98% 36%, 68% 58%, 79% 94%, 50% 72%, 21% 94%, 32% 58%, 2% 36%, 39% 36%); filter: drop-shadow(0 0 5px #ffe487) drop-shadow(0 0 12px rgba(255,215,105,.8)); cursor: pointer; pointer-events: auto; animation: twinkle 2.4s ease-in-out infinite alternate; }
-.donor-star:hover, .donor-star:focus-visible { transform: scale(1.25); outline: none; }
-.donor-star > span { position: absolute; top: calc(100% + 10px); left: 50%; display: grid; gap: 3px; width: max-content; max-width: 190px; padding: 8px 11px; transform: translateX(-50%); border: 1px solid rgba(255,239,209,.35); border-radius: 12px; color: #fff8df; background: rgba(13,44,97,.96); box-shadow: 0 8px 22px rgba(7,29,61,.28); font-size: 12px; line-height: 1.35; opacity: 0; visibility: hidden; transition: opacity .16s ease; pointer-events: none; }
-.donor-star > span strong { color: #ffe487; font-size: 14px; }
-.donor-star > span small { color: #e2edf7; font-size: 11px; white-space: normal; }
-.donor-star:hover > span, .donor-star:focus-visible > span, .donor-star.is-open > span { opacity: 1; visibility: visible; }
+.star-field { position: absolute; z-index: 4; top: 0; left: 0; width: 100%; height: 65%; pointer-events: none; }
+.donor-star { position: absolute; width: 22px; height: 22px; pointer-events: none; }
+.donor-star-button { position: absolute; inset: 0; z-index: 1; width: 22px; height: 22px; padding: 0; border: 0; background: #ffe487; clip-path: polygon(50% 0, 61% 36%, 98% 36%, 68% 58%, 79% 94%, 50% 72%, 21% 94%, 32% 58%, 2% 36%, 39% 36%); filter: drop-shadow(0 0 5px #ffe487) drop-shadow(0 0 12px rgba(255,215,105,.8)); cursor: pointer; pointer-events: auto; animation: twinkle 2.4s ease-in-out infinite alternate; }
+.donor-star-button:hover, .donor-star-button:focus-visible { transform: scale(1.25); outline: none; }
+.donor-star-popup { position: absolute; z-index: 2; top: calc(100% + 10px); left: 0; display: grid; gap: 3px; width: max-content; max-width: 190px; padding: 8px 11px; border: 1px solid rgba(255,239,209,.35); border-radius: 12px; color: #fff8df; background: rgba(13,44,97,.96); box-shadow: 0 8px 22px rgba(7,29,61,.28); font-size: 12px; line-height: 1.35; opacity: 0; visibility: hidden; transition: opacity .16s ease; pointer-events: none; }
+.donor-star[data-side="right"] .donor-star-popup { right: 0; left: auto; }
+.donor-star-popup strong { color: #ffe487; font-size: 14px; }
+.donor-star-popup small { color: #e2edf7; font-size: 11px; white-space: normal; }
+.donor-star-button:hover + .donor-star-popup, .donor-star-button:focus-visible + .donor-star-popup, .donor-star.is-open .donor-star-popup { opacity: 1; visibility: visible; }
 @keyframes twinkle { from { opacity: .7; } to { opacity: 1; } }
 
 .house-section { padding: 20px 20px 70px; background: linear-gradient(180deg, #fffdf7 0%, #eaf7fb 100%); }
