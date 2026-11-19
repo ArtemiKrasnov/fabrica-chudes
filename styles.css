@@ -64,8 +64,7 @@ h1, h2 { font-family: "Comic Sans MS", "Trebuchet MS", "Segoe UI", cursive; }
 .windows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .window { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 174px; overflow: hidden; border: 6px solid #174f96; border-radius: 36px 36px 9px 9px; color: #17344e; background: #fff7d1; box-shadow: inset 0 0 18px rgba(255,255,255,.8), 0 5px 0 #ffd76a; cursor: pointer; transition: transform .2s, box-shadow .2s; }
 .window:hover, .window:focus-visible { transform: translateY(-5px); box-shadow: inset 0 0 30px white, 0 12px 0 #df4d62; outline: none; }
-.window::before { position: absolute; z-index: 0; top: 7px; right: 7px; left: 7px; height: 42%; content: ""; border: 4px solid #174f96; border-radius: 25px 25px 3px 3px; background: linear-gradient(90deg, transparent 47%, #174f96 47% 53%, transparent 53%), linear-gradient(0deg, transparent 46%, #174f96 46% 54%, transparent 54%), var(--window-glass, linear-gradient(135deg, #d6faff, #70cde1 55%, #c3f4f4)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 15px rgba(255,255,255,.65); }
-.window::after { position: absolute; z-index: 1; top: 47%; right: 0; left: 0; height: 7px; content: ""; background: #174f96; box-shadow: 0 3px 0 #ffd76a; }
+.window::before { position: absolute; z-index: 0; top: 7px; right: 7px; bottom: 7px; left: 7px; content: ""; border: 4px solid #174f96; border-radius: 25px 25px 3px 3px; background: linear-gradient(90deg, transparent 47%, #174f96 47% 53%, transparent 53%), linear-gradient(0deg, transparent 46%, #174f96 46% 54%, transparent 54%), var(--window-glass, linear-gradient(135deg, #d6faff, #70cde1 55%, #c3f4f4)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 15px rgba(255,255,255,.65); }
 .window-snow, .window-icon { display: none; }
 .window-scene { position: absolute; z-index: 2; top: 8%; left: 50%; transform: translateX(-50%); font-size: clamp(22px, 3vw, 34px); line-height: 1; filter: drop-shadow(0 2px 3px rgba(13,44,97,.35)); }
 .window-medical { --window-glass: linear-gradient(135deg, #ffe5e8, #f88d9a 55%, #ffe1d2); }
@@ -80,19 +79,20 @@ h1, h2 { font-family: "Comic Sans MS", "Trebuchet MS", "Segoe UI", cursive; }
 .window b {
   position: absolute;
   z-index: 3;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  bottom: 8%;
+  left: 8px;
+  right: 8px;
   display: block;
   min-height: 0;
   padding: 7px 8px;
   transform: translateY(5px);
-  border-top: 2px solid #174f96;
   color: #17344e;
-  background: rgba(255, 253, 247, .96);
+  background: transparent;
   font-family: "Comic Sans MS", "Trebuchet MS", cursive;
   font-size: 14px;
   line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(255,255,255,.95), 0 0 7px rgba(255,255,255,.8);
   opacity: 0;
   visibility: hidden;
   transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
@@ -257,8 +257,7 @@ main { position: relative; }
   .hall p { margin: 0; }
   .child-helper { position: relative; top: auto; left: auto; width: 38px; height: 46px; transform: none; }
   .window { min-width: 0; min-height: 68px; padding: 3px 2px; border-width: 4px; border-radius: 22px 22px 7px 7px; }
-  .window::before { top: 4px; right: 4px; left: 4px; border-width: 3px; border-radius: 15px 15px 2px 2px; }
-  .window::after { top: 47%; height: 4px; }
+  .window::before { top: 4px; right: 4px; bottom: 4px; left: 4px; border-width: 3px; border-radius: 15px 15px 2px 2px; }
   .window-icon { display: none; }
   .window b { font-size: 9px; }
   .cellar { grid-template-columns: 1fr; gap: 4px; padding: 6px 8px 8px; border-top-width: 5px; }
