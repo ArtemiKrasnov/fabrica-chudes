@@ -1,12 +1,12 @@
 {
-  "name": "warm-house",
+  "name": "fabrica-chudes",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node server/index.mjs",
-    "start": "node server/index.mjs",
+    "server": "node server-java/run.mjs",
+    "start": "npm run server",
     "build": "vite build",
     "preview": "vite preview",
     "android:sync": "npm run build && cap sync android",
@@ -15,8 +15,6 @@
   "dependencies": {
     "@capacitor/android": "^8.6.0",
     "@capacitor/core": "^8.6.0",
-    "cors": "^2.8.6",
-    "express": "^5.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
