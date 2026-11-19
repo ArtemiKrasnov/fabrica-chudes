@@ -2,6 +2,7 @@ node_modules/
 dist/
 server/data/
 server-java/build/
+server-java/target/
 .env
 .env.*
 *.log
