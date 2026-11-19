@@ -192,11 +192,9 @@ main { position: relative; }
 .tagline { margin: 5px 0 10px; font-size: clamp(15px, 2.2vh, 20px); }
 .visit-button { padding: 10px 18px; }
 .house-section {
-  position: absolute;
+  position: relative;
   z-index: 4;
-  top: clamp(275px, 38vh, 330px);
-  right: 0;
-  left: 0;
+  margin-top: calc(clamp(275px, 38vh, 330px) - max(100svh, 600px));
   padding: 0 20px;
   background: transparent;
 }
@@ -214,7 +212,7 @@ main { position: relative; }
 
 @media (max-width: 720px) {
   .hero { min-height: 640px; }
-  .house-section { top: clamp(220px, 32vh, 265px); padding-right: 12px; padding-left: 12px; }
+  .house-section { margin-top: calc(clamp(280px, 43vh, 300px) - max(100svh, 600px)); padding-right: 12px; padding-left: 12px; }
   .house { width: min(520px, 94vw); }
   .hall { min-height: clamp(65px, 9vh, 78px); }
   .child-helper { top: 38px; transform: scale(.62); }
@@ -227,7 +225,7 @@ main { position: relative; }
 }
 @media (max-height: 720px) {
   .hero { min-height: 600px; }
-  .house-section { top: 270px; }
+  .house-section { margin-top: calc(280px - max(100svh, 600px)); }
   .floor { padding-top: 28px; padding-bottom: 6px; }
   .window { min-height: clamp(60px, 9vh, 74px); }
   .window-icon { width: 25px; height: 25px; margin-top: 3px; }
@@ -235,24 +233,24 @@ main { position: relative; }
   .hall { min-height: 60px; }
 }
 @media (max-width: 720px) and (max-height: 720px) {
-  .house-section { top: 210px; }
+  .house-section { margin-top: calc(268px - max(100svh, 600px)); }
   .floor { padding-top: 30px; }
 }
 .window-snow { display: none; }
-.house-section .house { transform: scale(.82, .76); transform-origin: top center; }
+.house-section .house { transform: scale(.82, .92); transform-origin: top center; }
 @media (max-width: 720px) {
-.house-section .house { transform: scale(.76, .66); }
+.house-section .house { transform: scale(.76, .84); }
 }
 @media (max-height: 720px) {
-  .house-section { top: 280px; }
-.house-section .house { transform: scale(.82, .68); }
+  .house-section { margin-top: calc(280px - max(100svh, 600px)); }
+.house-section .house { transform: scale(.82, .84); }
 }
 @media (max-width: 720px) and (max-height: 720px) {
-.house-section { top: 268px; }
-.house-section .house { transform: scale(.76, .66); }
+.house-section { margin-top: calc(268px - max(100svh, 600px)); }
+.house-section .house { transform: scale(.76, .82); }
 }
 @media (max-width: 720px) {
-  .house-section { top: clamp(280px, 43vh, 300px); }
+  .house-section { margin-top: calc(clamp(280px, 43vh, 300px) - max(100svh, 600px)); }
   .hall { align-items: center; padding: 8px 10px; }
   .hall p { margin: 0; }
   .child-helper { position: relative; top: auto; left: auto; width: 38px; height: 46px; transform: none; }
