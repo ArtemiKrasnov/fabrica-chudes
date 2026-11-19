@@ -105,7 +105,7 @@ function Snow() {
   );
 }
 
-function House({ onProjectClick }) {
+function House({ onProjectClick, report, progress }) {
   return (
     <section className="house-section" id="house" aria-label="Дом проектов">
       <div className="house">
@@ -136,6 +136,26 @@ function House({ onProjectClick }) {
             </div>
           </div>
         ))}
+        <section className="cellar" aria-label="Сменный отчёт">
+          <div className="cellar-heading">
+            <span aria-hidden="true">♨</span>
+            <div>
+              <p>Сменный отчёт — обновляется каждую неделю</p>
+            </div>
+          </div>
+          <div className="cellar-report">
+            <div className="cellar-total">
+              <strong>{report.collected.toLocaleString("ru-RU")} ₽</strong>
+              <span>собрано из {report.goal.toLocaleString("ru-RU")} ₽</span>
+            </div>
+            <div className="progress-track" aria-hidden="true">
+              <i style={{ width: `${progress}%` }} />
+            </div>
+            <ul>
+              {report.paid.map((item) => <li key={item}>✓ {item}</li>)}
+            </ul>
+          </div>
+        </section>
       </div>
     </section>
   );
@@ -285,21 +305,7 @@ function App() {
           <a className="visit-button" href="#house">Пойдём в гости <span>↓</span></a>
         </section>
 
-        <House onProjectClick={setProject} />
-
-        <section className="boiler">
-          <div>
-            <p className="eyebrow">Сменный отчёт</p>
-            <h2>Тепло становится реальным</h2>
-            <p className="report-update">отчёт обновляется каждую неделю</p>
-          </div>
-          <div className="report-card">
-            <strong>{report.collected.toLocaleString("ru-RU")} ₽</strong>
-            <span>собрано из {report.goal.toLocaleString("ru-RU")} ₽</span>
-            <div className="progress-track"><i style={{ width: `${progress}%` }} /></div>
-            <ul>{report.paid.map((item) => <li key={item}>✓ {item}</li>)}</ul>
-          </div>
-        </section>
+        <House onProjectClick={setProject} report={report} progress={progress} />
 
         <section className="faq" id="faq">
           <p className="eyebrow">Ответы на вопросы</p>
