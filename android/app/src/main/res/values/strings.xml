@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Тёплый дом</string>
+    <string name="title_activity_main">Тёплый дом</string>
+    <string name="package_name">ru.warmhouse.app</string>
+    <string name="custom_url_scheme">ru.warmhouse.app</string>
+</resources>
