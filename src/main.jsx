@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { Capacitor } from "@capacitor/core";
+import fundLogo from "../assets/fond-logo.jpeg";
+import {
+  createLocalTestStar,
+  donorStarsStorageKey,
+  initialReport,
+  readStoredValue,
+  reportStorageKey,
+  updateReportAfterDonation,
+} from "./offline-demo.js";
 import "../styles.css";
+
+const isNativeApp = Capacitor.isNativePlatform();
+const pendingPaymentStorageKey = "fabrica-pending-payment";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "")
+  || (import.meta.env.DEV ? "" : null);
+const apiAvailable = apiBaseUrl !== null;
+const apiUrl = (path) => `${apiBaseUrl ?? ""}${path}`;
 
 const floors = [
   {
@@ -170,14 +187,37 @@ function DonationModal({ project, onClose, onDonationComplete }) {
     event.preventDefault();
     setStatus("loading");
     try {
-      const response = await fetch("/api/payments", {
+      if (isNativeApp) {
+        const normalizedName = name.trim();
+        const donationAmount = Number(amount);
+        if (!normalizedName || !Number.isInteger(donationAmount) || donationAmount < 100 || donationAmount > 1000000) {
+          throw new Error("Укажите имя и целую сумму от 100 до 1 000 000 рублей.");
+        }
+        onDonationComplete(createLocalTestStar(project.title, donationAmount, normalizedName));
+        setStatus("success");
+        return;
+      }
+
+      if (!apiAvailable) {
+        throw new Error("Для оплаты подключите backend API и задайте VITE_API_BASE_URL.");
+      }
+
+      const response = await fetch(apiUrl("/api/payments"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: Number(amount), project: project.title, name }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Не удалось создать оплату.");
-      const confirmationResponse = await fetch(`/api/payments/${data.paymentId}/confirm`, {
+      if (data.confirmationUrl) {
+        localStorage.setItem(pendingPaymentStorageKey, JSON.stringify({
+          paymentId: data.paymentId,
+          amount: data.amount,
+        }));
+        window.location.assign(data.confirmationUrl);
+        return;
+      }
+      const confirmationResponse = await fetch(apiUrl(`/api/payments/${data.paymentId}/confirm`), {
         method: "POST",
       });
       const confirmation = await confirmationResponse.json();
@@ -201,7 +241,7 @@ function DonationModal({ project, onClose, onDonationComplete }) {
         {status === "success" ? (
           <div className="payment-success">
             <span>✦</span>
-            <p>Тестовая оплата прошла успешно.</p>
+            <p>Оплата прошла успешно.</p>
             <button type="button" onClick={onClose}>Вернуться к дому</button>
           </div>
         ) : (
@@ -228,7 +268,11 @@ function DonationModal({ project, onClose, onDonationComplete }) {
             </div>
             <button className="pay-button" type="submit" disabled={status === "loading"}>{status === "loading" ? "Создаём оплату…" : "Оплатить"}</button>
             {status !== "loading" && status && <p className="form-error">{status}</p>}
-            <p className="demo-note">Тестовый режим — реальные деньги не списываются.</p>
+            <p className="demo-note">
+              {isNativeApp
+                ? "Автономный демо-режим: данные сохраняются только на этом устройстве, реальные деньги не списываются."
+                : "Оплата проводится через безопасную страницу ЮKassa."}
+            </p>
           </form>
         )}
       </section>
@@ -271,21 +315,74 @@ function DonorStars({ stars }) {
 
 function App() {
   const [project, setProject] = useState(null);
-  const [donorStars, setDonorStars] = useState([]);
-  const [report, setReport] = useState({ collected: 184750, goal: 300000, paid: [] });
+  const [donorStars, setDonorStars] = useState(() => (
+    isNativeApp ? readStoredValue(localStorage, donorStarsStorageKey, []) : []
+  ));
+  const [report, setReport] = useState(() => (
+    isNativeApp ? readStoredValue(localStorage, reportStorageKey, initialReport) : initialReport
+  ));
 
   useEffect(() => {
-    fetch("/api/stars")
+    if (isNativeApp || !apiAvailable) return;
+    fetch(apiUrl("/api/stars"))
       .then(async (response) => {
         if (!response.ok) throw new Error("Не удалось загрузить звёзды донатеров.");
         const data = await response.json();
         setDonorStars(data);
       })
       .catch((error) => console.error(error));
-    fetch("/api/report")
+    fetch(apiUrl("/api/report"))
       .then((response) => response.ok ? response.json() : null)
       .then((data) => data && setReport(data))
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (isNativeApp || !apiAvailable) return;
+    const pending = localStorage.getItem(pendingPaymentStorageKey);
+    if (!pending) return;
+
+    let cancelled = false;
+    let attempts = 0;
+
+    const checkPayment = async () => {
+      const payment = JSON.parse(pending);
+      const response = await fetch(apiUrl(`/api/payments/${payment.paymentId}/confirm`), { method: "POST" });
+      const confirmation = await response.json();
+      if (!response.ok) throw new Error(confirmation.error || "Не удалось проверить оплату.");
+
+      if (confirmation.status === "succeeded" && confirmation.star) {
+        if (!cancelled) {
+          setDonorStars((current) => current.some((star) => star.id === confirmation.star.id)
+            ? current
+            : [...current, confirmation.star]);
+          setReport((current) => ({
+            ...current,
+            collected: current.collected + confirmation.star.amount,
+          }));
+          localStorage.removeItem(pendingPaymentStorageKey);
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const poll = async () => {
+      try {
+        while (!cancelled && attempts < 12) {
+          attempts += 1;
+          if (await checkPayment()) return;
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    poll();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -303,7 +400,7 @@ function App() {
         <section className="hero">
           <Snow />
           <DonorStars stars={donorStars} />
-          <img className="fund-logo" src="/assets/fond-logo.jpeg" alt="Российский детский фонд — Пензенское отделение" />
+          <img className="fund-logo" src={fundLogo} alt="Российский детский фонд — Пензенское отделение" />
           <p className="fund-name">Пензенское отделение Российского детского фонда</p>
           <h1>Фабрика чудес</h1>
           <p className="tagline">Чудо — это ручная работа</p>
@@ -317,14 +414,25 @@ function App() {
           <h2>Как рождается помощь</h2>
           <details><summary>Куда идут пожертвования?</summary><p>На проекты фонда: поездки, театр, мастерские, медико-социальную поддержку и помощь семьям.</p></details>
           <details><summary>Можно ли помочь конкретному проекту?</summary><p>Да. Выберите любое окно в доме, откройте проект и сделайте пожертвование.</p></details>
-          <details><summary>Это безопасная оплата?</summary><p>На сайте включён тестовый режим. Перед запуском будем подключён официальный платёжный провайдер.</p></details>
+          <details><summary>Это безопасная оплата?</summary><p>Оплата обрабатывается через защищённый сервис ЮKassa. Данные карты вводятся только на странице провайдера.</p></details>
         </section>
       </main>
       {project && (
         <DonationModal
           project={project}
           onClose={() => setProject(null)}
-          onDonationComplete={(star) => setDonorStars((current) => [...current, star])}
+          onDonationComplete={(star) => {
+            const updatedStars = [...donorStars, star];
+            const updatedReport = isNativeApp
+              ? updateReportAfterDonation(report, star.amount)
+              : report;
+            if (isNativeApp) {
+              localStorage.setItem(donorStarsStorageKey, JSON.stringify(updatedStars));
+              localStorage.setItem(reportStorageKey, JSON.stringify(updatedReport));
+            }
+            setDonorStars(updatedStars);
+            setReport(updatedReport);
+          }}
         />
       )}
     </>

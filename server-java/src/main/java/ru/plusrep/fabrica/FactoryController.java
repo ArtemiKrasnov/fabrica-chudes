@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("/api")
@@ -55,6 +56,18 @@ public class FactoryController {
     @PostMapping("/payments/{paymentId}/confirm")
     public PaymentService.PaymentConfirmed confirmPayment(@PathVariable String paymentId) {
         return paymentService.confirm(paymentId);
+    }
+
+    @PostMapping("/payments/webhook")
+    public ResponseEntity<Void> paymentWebhook(@RequestBody JsonNode webhook) {
+        if (!"payment.succeeded".equals(webhook.path("event").asText())) {
+            return ResponseEntity.ok().build();
+        }
+        String paymentId = webhook.path("object").path("id").asText();
+        if (!paymentId.isBlank()) {
+            paymentService.confirmWebhook(paymentId);
+        }
+        return ResponseEntity.ok().build();
     }
 
     public record ReportResponse(long collected, long goal, String updatedAt, List<String> paid) {}

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "node --test",
     "server": "node server-java/run.mjs",
     "server:test": "node server-java/run.mjs test",
     "start": "npm run server",
